@@ -18,6 +18,51 @@ disruptions via a high-availability fallback queue.
 |4|Performance & Analytics|Benchmarking Engine (free-llm bench) & Context Optimization|
 |5|Distribution & Packaging|PyPI Packaging, GitHub Actions CI/CD setup, & Extension Guide|
 
+## High-Level Architecture
+
+```
+                          ┌──────────────────────┐
+                          │   User / CLI Input    │
+                          │  free-llm run "..."   │
+                          └──────────┬───────────┘
+                                     │
+                                     ▼
+                          ┌──────────────────────┐
+                          │  Interactive Selector │
+                          │  (pick top 5 from     │
+                          │   working providers)  │
+                          └──────────┬───────────┘
+                                     │
+                                     ▼
+                          ┌──────────────────────┐
+                          │ Fallback Router Engine│
+                          │  ┌─ Provider Queue ─┐ │
+                          │  │ [A] [B] [C] ...  │ │
+                          │  └──────────────────┘ │
+                          │  + Circuit Breaker    │
+                          │  + Quarantine State   │
+                          └──────────┬───────────┘
+                                     │
+       ┌─────────────────────────────┼─────────────────────────────┐
+       ▼                             ▼                             ▼
+┌──────────────┐            ┌──────────────┐            ┌──────────────┐
+│  Provider A  │            │  Provider B  │            │  Provider C  │
+│  (e.g., Groq)│ ──429──▶  │ (e.g., Nova) │ ──429──▶  │ (e.g., OpenR)│
+│  primary     │   fail←   │  fallback 1  │   fail←   │  fallback 2  │
+└──────────────┘            └──────────────┘            └──────────────┘
+       │                            │                            │
+       └─────────────┬──────────────┘────────────────────────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Response / Output   │
+          └──────────────────────┘
+```
+
+**Flow:** User invokes `free-llm` → interactive provider selection → selected providers form a
+priority queue → the router tries each in order → on failure (429/5xx/timeout) it automatically
+falls through to the next → if all exhausted, reports no providers available.
+
 ## Detailed Breakdown & Tasks
 
 ### Iteration 1: Foundation & Unified Interface
