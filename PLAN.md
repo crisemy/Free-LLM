@@ -22,33 +22,33 @@ disruptions via a high-availability fallback queue.
 
 ```
                           ┌──────────────────────┐
-                          │   User / CLI Input    │
-                          │  free-llm run "..."   │
+                          │   User / CLI Input   │
+                          │  free-llm run "..."  │
                           └──────────┬───────────┘
                                      │
                                      ▼
                           ┌──────────────────────┐
-                          │  Interactive Selector │
-                          │  (pick top 5 from     │
-                          │   working providers)  │
+                          │ Interactive Selector │
+                          │ (pick top 5 from     │
+                          │ working providers)   │
                           └──────────┬───────────┘
                                      │
                                      ▼
                           ┌──────────────────────┐
-                          │ Fallback Router Engine│
-                          │  ┌─ Provider Queue ─┐ │
-                          │  │ [A] [B] [C] ...  │ │
-                          │  └──────────────────┘ │
-                          │  + Circuit Breaker    │
-                          │  + Quarantine State   │
+                          │ Fallback Router Eng  │
+                          │  ┌─ Provider Queue ─┐│
+                          │  │ [A] [B] [C] ..   ││
+                          │  └──────────────────┘│
+                          │  + Circuit Breaker   │
+                          │  + Quarantine State  │
                           └──────────┬───────────┘
                                      │
        ┌─────────────────────────────┼─────────────────────────────┐
        ▼                             ▼                             ▼
 ┌──────────────┐            ┌──────────────┐            ┌──────────────┐
 │  Provider A  │            │  Provider B  │            │  Provider C  │
-│  (e.g., Groq)│ ──429──▶  │ (e.g., Nova) │ ──429──▶  │ (e.g., OpenR)│
-│  primary     │   fail←   │  fallback 1  │   fail←   │  fallback 2  │
+│  (e.g., Groq)│ ──429──▶  │ (e.g., Nova) │ ──429──▶   │ (e.g., OpR)  │
+│  primary     │   fail←    │  fallback 1  │   fail←    │  fallback 2  │
 └──────────────┘            └──────────────┘            └──────────────┘
        │                            │                            │
        └─────────────┬──────────────┘────────────────────────────┘
